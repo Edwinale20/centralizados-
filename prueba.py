@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 
 
 # Ruta de la carpeta de OneDrive del usuario
-ruta_onedrive = r"C:\Users\omen0\OneDrive"
+ruta_onedrive = r"C:\Users\omen0\OneDrive\Documentos"
 
 # Paso 2: Subir el archivo semanal "centralizado BAT" desde la interfaz de Streamlit
 st.title("Carga y proceso de 'centralizado BAT'")
