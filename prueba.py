@@ -111,8 +111,11 @@ if st.button('Guardar Archivos'):
 # Paso 6: Crear tabla con la suma de paquetes para cada PLAZA BAT
 st.title("Tabla de Suma de Paquetes por PLAZA BAT")
 
-# Verificar que las columnas necesarias existan en el DataFrame
+# Verificar que las columnas necesarias existan en el DataFrame y no contengan valores nulos
 if 'PLAZA BAT' in dataframe_bat.columns and 'FECHA DE PEDIDO' in dataframe_bat.columns and 'PAQUETES' in dataframe_bat.columns:
+    # Eliminar filas con valores nulos en las columnas de interés
+    dataframe_bat = dataframe_bat.dropna(subset=['PLAZA BAT', 'FECHA DE PEDIDO', 'PAQUETES'])
+    
     # Calcular la suma de paquetes para cada PLAZA BAT
     suma_paquetes = dataframe_bat.groupby(['PLAZA BAT', 'FECHA DE PEDIDO'])['PAQUETES'].sum().reset_index()
     suma_paquetes.columns = ['PLAZA', 'FECHA DE PEDIDO', 'PAQUETES']
@@ -146,6 +149,7 @@ if 'PLAZA BAT' in dataframe_bat.columns and 'FECHA DE PEDIDO' in dataframe_bat.c
     )
 else:
     st.error("Las columnas necesarias ('PLAZA BAT', 'FECHA DE PEDIDO', 'PAQUETES') no están presentes en el archivo subido.")
+
 
 # Paso 7: Crear gráficos de barras comparativos de paquetes por plaza BAT y sus límites
 import plotly.figure_factory as ff
