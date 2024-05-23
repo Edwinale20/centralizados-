@@ -87,10 +87,16 @@ if archivo_subido:
         for fecha in fechas_pedido:
             fecha_str = pd.to_datetime(fecha).strftime("%d%m%Y")
             for plaza, (codigo, id_tienda) in plazas.items():
+                # Verificar la lógica de filtrado y mostrar mensajes de depuración
+                st.write(f"Procesando plaza: {plaza}, fecha: {fecha_str}")
                 if tipo_pedido == "complementario" and 'N TIENDA' in dataframe_bat.columns:
                     df_plaza = dataframe_bat[(dataframe_bat['N TIENDA'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)][columnas_sin_paquetes]
+                    st.write(f"Filtrando por N TIENDA: {plaza}")
                 else:
                     df_plaza = dataframe_bat[(dataframe_bat['PLAZA BAT'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)][columnas_sin_paquetes]
+                    st.write(f"Filtrando por PLAZA BAT: {plaza}")
+
+                st.write(f"Datos filtrados: {df_plaza}")
 
                 if not df_plaza.empty:
                     df_plaza.insert(0, 'ID Tienda', id_tienda)  # Insertar la columna ID Tienda como la primera columna
@@ -239,4 +245,3 @@ if archivo_subido:
 
     # Mostrar la gráfica en Streamlit
     st.plotly_chart(fig)
-
