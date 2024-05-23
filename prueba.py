@@ -6,7 +6,6 @@ import streamlit as st
 import os
 import plotly.graph_objects as go
 
-
 # Ruta de la carpeta de OneDrive del usuario
 ruta_onedrive = r"C:\Users\omen0\OneDrive\Documentos"
 
@@ -88,7 +87,7 @@ if archivo_subido:
         for fecha in fechas_pedido:
             fecha_str = pd.to_datetime(fecha).strftime("%d%m%Y")
             for plaza, (codigo, id_tienda) in plazas.items():
-                if 'N TIENDA' in dataframe_bat.columns:
+                if tipo_pedido == "complementario" and 'N TIENDA' in dataframe_bat.columns:
                     df_plaza = dataframe_bat[(dataframe_bat['N TIENDA'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)][columnas_sin_paquetes]
                 else:
                     df_plaza = dataframe_bat[(dataframe_bat['PLAZA BAT'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)][columnas_sin_paquetes]
@@ -165,11 +164,7 @@ if archivo_subido:
     suma_paquetes = suma_paquetes[['PLAZA', 'ID PLAZA', 'PAQUETES', 'FOLIOS', 'FECHA DE PEDIDO', 'FECHA DE ENTREGA', 'TIPO DE PEDIDO']]
     st.write(suma_paquetes)
 
-
     # Paso 7: Crear gráficos de barras comparativos de paquetes por plaza BAT y sus límites
-    import plotly.graph_objects as go
-    import plotly.figure_factory as ff
-
     st.title("Gráfica Comparativa de Paquetes por Plaza BAT")
 
     # Definir límites de paquetes por plaza
@@ -244,3 +239,4 @@ if archivo_subido:
 
     # Mostrar la gráfica en Streamlit
     st.plotly_chart(fig)
+
