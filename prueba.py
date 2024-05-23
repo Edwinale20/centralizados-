@@ -39,6 +39,40 @@ if archivo_subido:
     # Definir columnas sin PAQUETES
     columnas_sin_paquetes = ['UPC', 'SKU 7 ELEVEN', 'ARTICULO 7 ELEVEN', 'CAJETILLAS X PQT', 'CAJETILLAS']
 
+    # Lista para almacenar los enlaces de descarga generados
+    download_links = []
+
+    # Botón para generar y descargar archivos
+    if st.button('Generar Archivos'):
+        fechas_pedido = dataframe_bat['FECHA DE PEDIDO'].unique()
+        archivos_generados = []
+
+        for fecha in fechas_pedido:
+            fecha_str = pd.to_datetime(fecha).strftime("%d%m%Y")
+            for plaza, (codigo, id_tienda) in plazas.items():
+                if 'N TIENDA' in dataframe_bat.columns:
+                    df_plaza = dataframe_bat[(dataframe_bat['N TIENDA'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)][columnas_sin_paquetes]
+                else:
+                    df_plaza = dataframe_bat[(dataframe_bat['PLAZA BAT'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)][columnas_sin_paquetes]
+
+                if not df_plaza.empty:
+                    df_plaza.insert(0, 'ID Tienda', id_tienda)  # Insertar la columna ID Tienda como la primera columna
+                    # Cambiar nombres de columnas
+                    df_plaza.columns = ['id Tienda', 'Codigo de Barras', 'Id Articulo', 'Descripcion', 'Unidad Empaque', 'Cantidad (Pza)']
+                    nombre_archivo = f"{codigo} {fecha_str}.csv"
+                    archivos_generados.append((nombre_archivo, df_plaza))
+                    
+                    # Generar enlace de descarga
+                    csv = df_plaza.to_csv(index=False).encode('utf-8')
+                    b64 = base64.b64encode(csv).decode()
+                    href = f'<a href="data:file/csv;base64,{b64}" download="{nombre_archivo}">Descargar {nombre_archivo}</a>'
+                    download_links.append(href)
+
+        if archivos_generados:
+            st.markdown("<br>".join(download_links), unsafe_allow_html=True)
+        else:
+            st.warning("No se generaron archivos.")
+
     # Paso 3: Filtrar por PLAZA BAT o N TIENDA usando un botón y mostrar todas las columnas (sin la columna PAQUETES)
     st.title("Filtrar por PLAZA BAT o N TIENDA")
 
