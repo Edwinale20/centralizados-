@@ -5,9 +5,7 @@ import csv
 import streamlit as st
 import os
 import plotly.graph_objects as go
-
-# Ruta de la carpeta de OneDrive del usuario
-ruta_onedrive = r"C:\Users\omen0\OneDrive\Documentos"
+from io import BytesIO
 
 # Paso 2: Subir el archivo semanal "centralizado BAT" desde la interfaz de Streamlit
 st.title("Carga y proceso de 'centralizado BAT'")
@@ -60,29 +58,22 @@ if archivo_subido:
         st.write(f"Filtrado por {columna_filtrar}: {seleccion_filtrar}")
         st.write(dataframe_filtrado)
 
-# Paso 4: Filtrar por cada plaza y guardar en archivos separados por fecha de pedido (sin la columna PAQUETES)
-plazas = {
-    'REYNOSA': ('100 110', '9271'),
-    'MÉXICO': ('200', '9211'),
-    'JALISCO': ('300', '9221'),
-    'SALTILLO': ('400 410', '9261'),
-    'MONTERREY': ('500', '9201'),
-    'BAJA CALIFORNIA': ('600 610 620', '9231'),
-    'HERMOSILLO': ('650', '9251'),
-    'PUEBLA': ('700', '9291'),
-    'CUERNAVACA': ('720', '9281'),
-    'YUCATAN': ('800', '9241'),
-    'QUINTANA ROO': ('890', '9289')
-}
+    # Paso 4: Filtrar por cada plaza y guardar en archivos separados por fecha de pedido (sin la columna PAQUETES)
+    plazas = {
+        'REYNOSA': ('100 110', '9271'),
+        'MÉXICO': ('200', '9211'),
+        'JALISCO': ('300', '9221'),
+        'SALTILLO': ('400 410', '9261'),
+        'MONTERREY': ('500', '9201'),
+        'BAJA CALIFORNIA': ('600 610 620', '9231'),
+        'HERMOSILLO': ('650', '9251'),
+        'PUEBLA': ('700', '9291'),
+        'CUERNAVACA': ('720', '9281'),
+        'YUCATAN': ('800', '9241'),
+        'QUINTANA ROO': ('890', '9289')
+    }
 
-# Crear carpeta si no existe
-carpeta_destino = os.path.join(ruta_onedrive, "centralizados semanal BAT")
-if not os.path.exists(carpeta_destino):
-    os.makedirs(carpeta_destino)
-    st.write(f"Carpeta '{carpeta_destino}' creada en OneDrive.")
-
-# Botón para guardar archivos
-if st.button('Guardar Archivos'):
+    archivos_generados = []
     fechas_pedido = dataframe_bat['FECHA DE PEDIDO'].unique()
     for fecha in fechas_pedido:
         fecha_str = pd.to_datetime(fecha).strftime("%d%m%Y")
@@ -101,11 +92,19 @@ if st.button('Guardar Archivos'):
                 # Cambiar nombres de columnas
                 df_plaza.columns = ['id Tienda', 'Codigo de Barras', 'Id Articulo', 'Descripcion', 'Unidad Empaque', 'Cantidad (Pza)']
                 nombre_archivo = f"{codigo} {fecha_str}.csv"
-                ruta_archivo = os.path.join(carpeta_destino, nombre_archivo)
-                df_plaza.to_csv(ruta_archivo, index=False)
-                st.write(f"Archivo guardado: {ruta_archivo}")
-            else:
-                st.warning(f"No se encontraron datos para la {columna_filtrar} {plaza} en la fecha {fecha_str}")
+                archivos_generados.append((nombre_archivo, df_plaza))
+
+    # Botón para descargar archivos
+    for nombre_archivo, df in archivos_generados:
+        buffer = BytesIO()
+        df.to_csv(buffer, index=False)
+        buffer.seek(0)
+        st.download_button(
+            label=f"Descargar {nombre_archivo}",
+            data=buffer,
+            file_name=nombre_archivo,
+            mime="text/csv"
+        )
     st.write("Proceso completado.")
 
 # Paso 6: Crear tabla con la suma de paquetes para cada PLAZA BAT
