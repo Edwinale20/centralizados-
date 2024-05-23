@@ -6,9 +6,13 @@ import streamlit as st
 import os
 import plotly.graph_objects as go
 
+
+# Ruta de la carpeta de OneDrive del usuario
+ruta_onedrive = r"C:\Users\omen0\OneDrive\Documentos"
+
 # Paso 2: Subir el archivo semanal "centralizado BAT" desde la interfaz de Streamlit
 st.title("Carga y proceso de 'centralizado BAT'")
-
+  
 # Opción para cargar el archivo
 archivo_subido = st.file_uploader("Sube el archivo", type=["xlsx"])
 
@@ -38,40 +42,6 @@ if archivo_subido:
 
     # Definir columnas sin PAQUETES
     columnas_sin_paquetes = ['UPC', 'SKU 7 ELEVEN', 'ARTICULO 7 ELEVEN', 'CAJETILLAS X PQT', 'CAJETILLAS']
-
-    # Lista para almacenar los enlaces de descarga generados
-    download_links = []
-
-    # Botón para generar y descargar archivos
-    if st.button('Generar Archivos'):
-        fechas_pedido = dataframe_bat['FECHA DE PEDIDO'].unique()
-        archivos_generados = []
-
-        for fecha in fechas_pedido:
-            fecha_str = pd.to_datetime(fecha).strftime("%d%m%Y")
-            for plaza, (codigo, id_tienda) in plazas.items():
-                if 'N TIENDA' in dataframe_bat.columns:
-                    df_plaza = dataframe_bat[(dataframe_bat['N TIENDA'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)][columnas_sin_paquetes]
-                else:
-                    df_plaza = dataframe_bat[(dataframe_bat['PLAZA BAT'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)][columnas_sin_paquetes]
-
-                if not df_plaza.empty:
-                    df_plaza.insert(0, 'ID Tienda', id_tienda)  # Insertar la columna ID Tienda como la primera columna
-                    # Cambiar nombres de columnas
-                    df_plaza.columns = ['id Tienda', 'Codigo de Barras', 'Id Articulo', 'Descripcion', 'Unidad Empaque', 'Cantidad (Pza)']
-                    nombre_archivo = f"{codigo} {fecha_str}.csv"
-                    archivos_generados.append((nombre_archivo, df_plaza))
-                    
-                    # Generar enlace de descarga
-                    csv = df_plaza.to_csv(index=False).encode('utf-8')
-                    b64 = base64.b64encode(csv).decode()
-                    href = f'<a href="data:file/csv;base64,{b64}" download="{nombre_archivo}">Descargar {nombre_archivo}</a>'
-                    download_links.append(href)
-
-        if archivos_generados:
-            st.markdown("<br>".join(download_links), unsafe_allow_html=True)
-        else:
-            st.warning("No se generaron archivos.")
 
     # Paso 3: Filtrar por PLAZA BAT o N TIENDA usando un botón y mostrar todas las columnas (sin la columna PAQUETES)
     st.title("Filtrar por PLAZA BAT o N TIENDA")
@@ -106,11 +76,15 @@ if archivo_subido:
         'QUINTANA ROO': ('890', '9289')
     }
 
-    # Botón para generar y descargar archivos
-    if st.button('Generar Archivos'):
-        fechas_pedido = dataframe_bat['FECHA DE PEDIDO'].unique()
-        archivos_generados = []
+    # Crear carpeta si no existe
+    carpeta_destino = os.path.join(ruta_onedrive, "centralizados semanal BAT")
+    if not os.path.exists(carpeta_destino):
+        os.makedirs(carpeta_destino)
+        st.write(f"Carpeta '{carpeta_destino}' creada en OneDrive.")
 
+    # Botón para guardar archivos
+    if st.button('Guardar Archivos'):
+        fechas_pedido = dataframe_bat['FECHA DE PEDIDO'].unique()
         for fecha in fechas_pedido:
             fecha_str = pd.to_datetime(fecha).strftime("%d%m%Y")
             for plaza, (codigo, id_tienda) in plazas.items():
@@ -124,19 +98,12 @@ if archivo_subido:
                     # Cambiar nombres de columnas
                     df_plaza.columns = ['id Tienda', 'Codigo de Barras', 'Id Articulo', 'Descripcion', 'Unidad Empaque', 'Cantidad (Pza)']
                     nombre_archivo = f"{codigo} {fecha_str}.csv"
-                    archivos_generados.append((nombre_archivo, df_plaza))
-
-        if archivos_generados:
-            for nombre_archivo, df_plaza in archivos_generados:
-                csv = df_plaza.to_csv(index=False).encode('utf-8')
-                st.download_button(
-                    label=f"Descargar {nombre_archivo}",
-                    data=csv,
-                    file_name=nombre_archivo,
-                    mime='text/csv'
-                )
-        else:
-            st.warning("No se generaron archivos.")
+                    ruta_archivo = os.path.join(carpeta_destino, nombre_archivo)
+                    df_plaza.to_csv(ruta_archivo, index=False)
+                    st.write(f"Archivo guardado: {ruta_archivo}")
+                else:
+                    st.warning(f"No se encontraron datos para la {columna_filtrar} {plaza} en la fecha {fecha_str}")
+        st.write("Proceso completado.")
 
     # Paso 6: Crear tabla con la suma de paquetes para cada PLAZA BAT
     st.title("Tabla de Suma de Paquetes por PLAZA BAT")
@@ -165,7 +132,7 @@ if archivo_subido:
 
     # Opción para copiar el DataFrame
     st.title("Copiar DataFrame")
-    csv = suma_paquetes.to_csv(index=False).encode('utf-8')
+    csv = suma_paquetes.to_csv(index=False)
     st.download_button(
         label="Copiar Tabla",
         data=csv,
@@ -173,7 +140,36 @@ if archivo_subido:
         mime='text/csv',
     )
 
+    # Paso 6: Crear tabla con la suma de paquetes para cada PLAZA BAT
+    st.title("Tabla de Suma de Paquetes por PLAZA BAT")
+
+    # Calcular la suma de paquetes para cada PLAZA BAT
+    suma_paquetes = dataframe_bat.groupby(['PLAZA BAT', 'FECHA DE PEDIDO'])['PAQUETES'].sum().reset_index()
+    suma_paquetes.columns = ['PLAZA', 'FECHA DE PEDIDO', 'PAQUETES']
+
+    # Formatear las fechas para que no incluyan la hora
+    suma_paquetes['FECHA DE PEDIDO'] = pd.to_datetime(suma_paquetes['FECHA DE PEDIDO']).dt.strftime('%Y-%m-%d')
+    suma_paquetes['FECHA DE ENTREGA'] = (pd.to_datetime(suma_paquetes['FECHA DE PEDIDO']) + pd.to_timedelta(1, unit='d')).dt.strftime('%Y-%m-%d')
+
+    # Crear tabla con columnas adicionales vacías
+    suma_paquetes['ID PLAZA'] = suma_paquetes['PLAZA'].map(lambda x: plazas[x][0])
+    suma_paquetes['FOLIOS'] = ''
+    suma_paquetes['TIPO DE PEDIDO'] = tipo_pedido.capitalize()
+
+    # Ordenar las plazas de menor a mayor
+    orden_plazas = ['REYNOSA', 'MÉXICO', 'JALISCO', 'SALTILLO', 'MONTERREY', 'BAJA CALIFORNIA', 'HERMOSILLO', 'PUEBLA', 'CUERNAVACA', 'YUCATAN', 'QUINTANA ROO']
+    suma_paquetes['PLAZA'] = pd.Categorical(suma_paquetes['PLAZA'], categories=orden_plazas, ordered=True)
+    suma_paquetes = suma_paquetes.sort_values('PLAZA')
+
+    # Reorganizar las columnas
+    suma_paquetes = suma_paquetes[['PLAZA', 'ID PLAZA', 'PAQUETES', 'FOLIOS', 'FECHA DE PEDIDO', 'FECHA DE ENTREGA', 'TIPO DE PEDIDO']]
+    st.write(suma_paquetes)
+
+
     # Paso 7: Crear gráficos de barras comparativos de paquetes por plaza BAT y sus límites
+    import plotly.graph_objects as go
+    import plotly.figure_factory as ff
+
     st.title("Gráfica Comparativa de Paquetes por Plaza BAT")
 
     # Definir límites de paquetes por plaza
@@ -213,19 +209,38 @@ if archivo_subido:
     ]
 
     # Inicializar la figura con la tabla
-    fig = go.Figure(data=[go.Table(header=dict(values=['Plaza', 'Paquetes', 'Límite']),
-                                   cells=dict(values=[df_comparativa.Plaza, df_comparativa.Paquetes, df_comparativa.Límite]))])
+    fig = ff.create_table(table_data, height_constant=60)
 
     # Crear trazos para la gráfica de barras
-    trace1 = go.Bar(x=df_comparativa['Plaza'], y=df_comparativa['Paquetes'], name='Paquetes')
-    trace2 = go.Bar(x=df_comparativa['Plaza'], y=df_comparativa['Límite'], name='Límite')
+    trace1 = go.Bar(x=df_comparativa['Plaza'], y=df_comparativa['Paquetes'], xaxis='x2', yaxis='y2',
+                    marker=dict(color='orange'),
+                    name='Paquetes')
+    trace2 = go.Bar(x=df_comparativa['Plaza'], y=df_comparativa['Límite'], xaxis='x2', yaxis='y2',
+                    marker=dict(color='green'),
+                    name='Límite')
 
     # Añadir trazos a la figura
     fig.add_traces([trace1, trace2])
 
-    # Actualizar el diseño de la figura
-    fig.update_layout(barmode='group', title_text='Comparativa de Paquetes por Plaza BAT')
+    # Inicializar ejes x2 y y2
+    fig['layout']['xaxis2'] = {}
+    fig['layout']['yaxis2'] = {}
+
+    # Editar el diseño para subplots
+    fig.layout.yaxis.update({'domain': [0, .45]})
+    fig.layout.yaxis2.update({'domain': [.6, 1]})
+
+    # Anclar los ejes x2 y y2
+    fig.layout.yaxis2.update({'anchor': 'x2'})
+    fig.layout.xaxis2.update({'anchor': 'y2'})
+    fig.layout.yaxis2.update({'title': 'Cantidad de Paquetes'})
+
+    # Actualizar los márgenes para añadir título y ver las etiquetas
+    fig.layout.margin.update({'t':75, 'l':50})
+    fig.layout.update({'title': 'Comparativa de Paquetes por Plaza BAT'})
+
+    # Actualizar la altura debido a la interacción con la tabla
+    fig.layout.update({'height':800})
 
     # Mostrar la gráfica en Streamlit
     st.plotly_chart(fig)
-
