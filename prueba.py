@@ -177,10 +177,7 @@ data = {
 df_comparativa = pd.DataFrame(data)
 
 # Crear una tabla para la comparación
-table_data = [
-    ['Plaza', 'Paquetes', 'Límite'],
-    *df_comparativa.values.tolist()
-]
+table_data = [['Plaza', 'Paquetes', 'Límite']] + df_comparativa.values.tolist()
 
 # Inicializar la figura con la tabla
 fig = ff.create_table(table_data, height_constant=60)
