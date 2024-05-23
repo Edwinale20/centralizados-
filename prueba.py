@@ -166,12 +166,14 @@ limites_paquetes = {
 # Calcular la suma de paquetes por agrupaciones específicas
 paquetes_noreste = suma_paquetes[suma_paquetes['PLAZA'].isin(['REYNOSA', 'MONTERREY', 'SALTILLO'])]['PAQUETES'].sum()
 paquetes_peninsula = suma_paquetes[suma_paquetes['PLAZA'].isin(['YUCATAN', 'QUINTANA ROO'])]['PAQUETES'].sum()
+paquetes_mexico = suma_paquetes[suma_paquetes['PLAZA'].isin(['MÉXICO', 'PUEBLA','CUERNAVACA'])]['PAQUETES'].sum()
 
 # Crear un nuevo DataFrame con las agrupaciones
 data = {
     'Plaza': ['Noreste', 'MÉXICO', 'PENÍNSULA', 'HERMOSILLO', 'JALISCO', 'BAJA CALIFORNIA'],
     'Paquetes': [
         paquetes_noreste,
+        paquetes_mexico,
         suma_paquetes[suma_paquetes['PLAZA'] == 'MÉXICO']['PAQUETES'].sum(),
         paquetes_peninsula,
         suma_paquetes[suma_paquetes['PLAZA'] == 'HERMOSILLO']['PAQUETES'].sum(),
