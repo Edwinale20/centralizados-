@@ -182,7 +182,7 @@ df_comparativa = pd.DataFrame(data)
 
 # Crear una figura con la tabla
 fig = go.Figure(data=[go.Table(
-    header=dict(values=['Plaza', 'Paquetes', 'Límite'],
+    header=dict(values=['<b>Plaza</b>', '<b>Paquetes</b>', '<b>Límite</b>'],
                 fill_color='paleturquoise',
                 align='left'),
     cells=dict(values=[df_comparativa.Plaza, df_comparativa.Paquetes, df_comparativa.Límite],
@@ -190,23 +190,28 @@ fig = go.Figure(data=[go.Table(
                align='left'))
 ])
 
+# Añadir la tabla a la figura
+fig.update_layout(
+    title_text='Comparativa de Paquetes por Plaza BAT',
+    title_x=0.5,
+    margin=dict(l=0, r=0, t=30, b=0)
+)
+
 # Crear trazos para la gráfica de barras
 trace1 = go.Bar(x=df_comparativa['Plaza'], y=df_comparativa['Paquetes'],
-                marker=dict(color='orange'), name='Paquetes')
+                marker=dict(color='darkorange'), name='Paquetes')
 trace2 = go.Bar(x=df_comparativa['Plaza'], y=df_comparativa['Límite'],
                 marker=dict(color='green'), name='Límite')
 
 # Añadir trazos a la figura
-fig.add_trace(trace1)
-fig.add_trace(trace2)
+fig.add_traces([trace1, trace2])
 
-# Configurar el layout
+# Configurar el layout para que las barras y la tabla se muestren correctamente
 fig.update_layout(
-    title='Comparativa de Paquetes por Plaza BAT',
-    xaxis=dict(title='Plaza'),
-    yaxis=dict(title='Cantidad de Paquetes'),
     barmode='group',
-    height=800
+    xaxis_title='Plaza',
+    yaxis_title='Cantidad de Paquetes',
+    height=600
 )
 
 # Mostrar la gráfica en Streamlit
