@@ -116,12 +116,20 @@ if 'PLAZA BAT' in dataframe_bat.columns and 'FECHA DE PEDIDO' in dataframe_bat.c
     # Eliminar filas con valores nulos en las columnas de interés
     dataframe_bat = dataframe_bat.dropna(subset=['PLAZA BAT', 'FECHA DE PEDIDO', 'PAQUETES'])
     
+    # Asegurarse de que las columnas tienen el tipo de dato correcto
+    dataframe_bat['PLAZA BAT'] = dataframe_bat['PLAZA BAT'].astype(str)
+    dataframe_bat['FECHA DE PEDIDO'] = pd.to_datetime(dataframe_bat['FECHA DE PEDIDO'], errors='coerce')
+    dataframe_bat['PAQUETES'] = pd.to_numeric(dataframe_bat['PAQUETES'], errors='coerce')
+    
+    # Verificar que no haya valores nulos después de la conversión
+    dataframe_bat = dataframe_bat.dropna(subset=['PLAZA BAT', 'FECHA DE PEDIDO', 'PAQUETES'])
+
     # Calcular la suma de paquetes para cada PLAZA BAT
     suma_paquetes = dataframe_bat.groupby(['PLAZA BAT', 'FECHA DE PEDIDO'])['PAQUETES'].sum().reset_index()
     suma_paquetes.columns = ['PLAZA', 'FECHA DE PEDIDO', 'PAQUETES']
 
     # Formatear las fechas para que no incluyan la hora
-    suma_paquetes['FECHA DE PEDIDO'] = pd.to_datetime(suma_paquetes['FECHA DE PEDIDO']).dt.strftime('%Y-%m-%d')
+    suma_paquetes['FECHA DE PEDIDO'] = suma_paquetes['FECHA DE PEDIDO'].dt.strftime('%Y-%m-%d')
     suma_paquetes['FECHA DE ENTREGA'] = (pd.to_datetime(suma_paquetes['FECHA DE PEDIDO']) + pd.to_timedelta(1, unit='d')).dt.strftime('%Y-%m-%d')
 
     # Crear tabla con columnas adicionales vacías
