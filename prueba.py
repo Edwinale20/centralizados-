@@ -180,42 +180,34 @@ data = {
 
 df_comparativa = pd.DataFrame(data)
 
-# Crear una tabla para la comparación
-table_data = [['Plaza', 'Paquetes', 'Límite']] + df_comparativa.values.tolist()
-
-# Inicializar la figura con la tabla
-fig = ff.create_table(table_data, height_constant=60)
+# Crear una figura con la tabla
+fig = go.Figure(data=[go.Table(
+    header=dict(values=['Plaza', 'Paquetes', 'Límite'],
+                fill_color='paleturquoise',
+                align='left'),
+    cells=dict(values=[df_comparativa.Plaza, df_comparativa.Paquetes, df_comparativa.Límite],
+               fill_color='lavender',
+               align='left'))
+])
 
 # Crear trazos para la gráfica de barras
-trace1 = go.Bar(x=df_comparativa['Plaza'], y=df_comparativa['Paquetes'], xaxis='x2', yaxis='y2',
-                marker=dict(color='orange'),
-                name='Paquetes')
-trace2 = go.Bar(x=df_comparativa['Plaza'], y=df_comparativa['Límite'], xaxis='x2', yaxis='y2',
-                marker=dict(color='green'),
-                name='Límite')
+trace1 = go.Bar(x=df_comparativa['Plaza'], y=df_comparativa['Paquetes'],
+                marker=dict(color='orange'), name='Paquetes')
+trace2 = go.Bar(x=df_comparativa['Plaza'], y=df_comparativa['Límite'],
+                marker=dict(color='green'), name='Límite')
 
 # Añadir trazos a la figura
-fig.add_traces([trace1, trace2])
+fig.add_trace(trace1)
+fig.add_trace(trace2)
 
-# Inicializar ejes x2 y y2
-fig['layout']['xaxis2'] = {}
-fig['layout']['yaxis2'] = {}
-
-# Editar el diseño para subplots
-fig.layout.yaxis.update({'domain': [0, .45]})
-fig.layout.yaxis2.update({'domain': [.6, 1]})
-
-# Anclar los ejes x2 y y2
-fig.layout.yaxis2.update({'anchor': 'x2'})
-fig.layout.xaxis2.update({'anchor': 'y2'})
-fig.layout.yaxis2.update({'title': 'Cantidad de Paquetes'})
-
-# Actualizar los márgenes para añadir título y ver las etiquetas
-fig.layout.margin.update({'t':75, 'l':50})
-fig.layout.update({'title': 'Comparativa de Paquetes por Plaza BAT'})
-
-# Actualizar la altura debido a la interacción con la tabla
-fig.layout.update({'height':800})
+# Configurar el layout
+fig.update_layout(
+    title='Comparativa de Paquetes por Plaza BAT',
+    xaxis=dict(title='Plaza'),
+    yaxis=dict(title='Cantidad de Paquetes'),
+    barmode='group',
+    height=800
+)
 
 # Mostrar la gráfica en Streamlit
 st.plotly_chart(fig)
