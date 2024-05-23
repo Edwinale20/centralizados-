@@ -77,6 +77,9 @@ if archivo_subido:
     fechas_pedido = dataframe_bat['FECHA DE PEDIDO'].unique()
     for fecha in fechas_pedido:
         fecha_str = pd.to_datetime(fecha).strftime("%d%m%Y")
+        fecha_pedido = pd.to_datetime(fecha) - pd.to_timedelta(1, unit='d')
+        fecha_pedido_str = fecha_pedido.strftime("%d%m%Y")
+        
         for plaza, (codigo, id_tienda) in plazas.items():
             # Ajustar lógica de filtrado según el tipo de pedido
             if tipo_pedido == "complementario" and 'N TIENDA' in dataframe_bat.columns:
@@ -91,6 +94,8 @@ if archivo_subido:
                 df_plaza.insert(0, 'ID Tienda', id_tienda)  # Insertar la columna ID Tienda como la primera columna
                 # Cambiar nombres de columnas
                 df_plaza.columns = ['id Tienda', 'Codigo de Barras', 'Id Articulo', 'Descripcion', 'Unidad Empaque', 'Cantidad (Pza)']
+                df_plaza['Fecha de Pedido'] = fecha_pedido_str
+                df_plaza['Fecha de Entrega'] = fecha_str
                 nombre_archivo = f"{codigo} {fecha_str}.csv"
                 archivos_generados.append((nombre_archivo, df_plaza))
 
@@ -156,7 +161,6 @@ if 'PLAZA BAT' in dataframe_bat.columns and 'FECHA DE PEDIDO' in dataframe_bat.c
     )
 else:
     st.error("Las columnas necesarias ('PLAZA BAT', 'FECHA DE PEDIDO', 'PAQUETES') no están presentes en el archivo subido.")
-
 
 # Paso 7: Crear gráficos de barras comparativos de paquetes por plaza BAT y sus límites
 import plotly.figure_factory as ff
