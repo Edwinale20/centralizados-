@@ -87,19 +87,11 @@ if st.button('Guardar Archivos'):
     for fecha in fechas_pedido:
         fecha_str = pd.to_datetime(fecha).strftime("%d%m%Y")
         for plaza, (codigo, id_tienda) in plazas.items():
-            # Mostrar un mensaje conciso indicando la plaza y la fecha
-            st.write(f"Procesando plaza: {plaza}, fecha: {fecha_str}")
-            
-            # Verificar la lógica de filtrado y mostrar mensajes de depuración concisos
+            # Ajustar lógica de filtrado según el tipo de pedido
             if tipo_pedido == "complementario" and 'N TIENDA' in dataframe_bat.columns:
                 df_plaza = dataframe_bat[(dataframe_bat['N TIENDA'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)][columnas_sin_paquetes]
-                st.write(f"Filtrando por N TIENDA: {plaza}")
             else:
                 df_plaza = dataframe_bat[(dataframe_bat['PLAZA BAT'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)][columnas_sin_paquetes]
-                st.write(f"Filtrando por PLAZA BAT: {plaza}")
-
-            # Mostrar solo la cantidad de filas filtradas
-            st.write(f"Datos filtrados: {df_plaza.shape[0]} filas")
 
             if not df_plaza.empty:
                 df_plaza.insert(0, 'ID Tienda', id_tienda)  # Insertar la columna ID Tienda como la primera columna
@@ -112,7 +104,7 @@ if st.button('Guardar Archivos'):
             else:
                 st.warning(f"No se encontraron datos para la {columna_filtrar} {plaza} en la fecha {fecha_str}")
     st.write("Proceso completado.")
-  
+
     # Paso 6: Crear tabla con la suma de paquetes para cada PLAZA BAT
     st.title("Tabla de Suma de Paquetes por PLAZA BAT")
 
