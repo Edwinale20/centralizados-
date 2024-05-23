@@ -111,37 +111,41 @@ if st.button('Guardar Archivos'):
 # Paso 6: Crear tabla con la suma de paquetes para cada PLAZA BAT
 st.title("Tabla de Suma de Paquetes por PLAZA BAT")
 
-# Calcular la suma de paquetes para cada PLAZA BAT
-suma_paquetes = dataframe_bat.groupby(['PLAZA BAT', 'FECHA DE PEDIDO'])['PAQUETES'].sum().reset_index()
-suma_paquetes.columns = ['PLAZA', 'FECHA DE PEDIDO', 'PAQUETES']
+# Verificar que las columnas necesarias existan en el DataFrame
+if 'PLAZA BAT' in dataframe_bat.columns and 'FECHA DE PEDIDO' in dataframe_bat.columns and 'PAQUETES' in dataframe_bat.columns:
+    # Calcular la suma de paquetes para cada PLAZA BAT
+    suma_paquetes = dataframe_bat.groupby(['PLAZA BAT', 'FECHA DE PEDIDO'])['PAQUETES'].sum().reset_index()
+    suma_paquetes.columns = ['PLAZA', 'FECHA DE PEDIDO', 'PAQUETES']
 
-# Formatear las fechas para que no incluyan la hora
-suma_paquetes['FECHA DE PEDIDO'] = pd.to_datetime(suma_paquetes['FECHA DE PEDIDO']).dt.strftime('%Y-%m-%d')
-suma_paquetes['FECHA DE ENTREGA'] = (pd.to_datetime(suma_paquetes['FECHA DE PEDIDO']) + pd.to_timedelta(1, unit='d')).dt.strftime('%Y-%m-%d')
+    # Formatear las fechas para que no incluyan la hora
+    suma_paquetes['FECHA DE PEDIDO'] = pd.to_datetime(suma_paquetes['FECHA DE PEDIDO']).dt.strftime('%Y-%m-%d')
+    suma_paquetes['FECHA DE ENTREGA'] = (pd.to_datetime(suma_paquetes['FECHA DE PEDIDO']) + pd.to_timedelta(1, unit='d')).dt.strftime('%Y-%m-%d')
 
-# Crear tabla con columnas adicionales vacías
-suma_paquetes['ID PLAZA'] = suma_paquetes['PLAZA'].map(lambda x: plazas[x][0])
-suma_paquetes['FOLIOS'] = ''
-suma_paquetes['TIPO DE PEDIDO'] = tipo_pedido.capitalize()
+    # Crear tabla con columnas adicionales vacías
+    suma_paquetes['ID PLAZA'] = suma_paquetes['PLAZA'].map(lambda x: plazas[x][0])
+    suma_paquetes['FOLIOS'] = ''
+    suma_paquetes['TIPO DE PEDIDO'] = tipo_pedido.capitalize()
 
-# Ordenar las plazas de menor a mayor
-orden_plazas = ['REYNOSA', 'MÉXICO', 'JALISCO', 'SALTILLO', 'MONTERREY', 'BAJA CALIFORNIA', 'HERMOSILLO', 'PUEBLA', 'CUERNAVACA', 'YUCATAN', 'QUINTANA ROO']
-suma_paquetes['PLAZA'] = pd.Categorical(suma_paquetes['PLAZA'], categories=orden_plazas, ordered=True)
-suma_paquetes = suma_paquetes.sort_values('PLAZA')
+    # Ordenar las plazas de menor a mayor
+    orden_plazas = ['REYNOSA', 'MÉXICO', 'JALISCO', 'SALTILLO', 'MONTERREY', 'BAJA CALIFORNIA', 'HERMOSILLO', 'PUEBLA', 'CUERNAVACA', 'YUCATAN', 'QUINTANA ROO']
+    suma_paquetes['PLAZA'] = pd.Categorical(suma_paquetes['PLAZA'], categories=orden_plazas, ordered=True)
+    suma_paquetes = suma_paquetes.sort_values('PLAZA')
 
-# Reorganizar las columnas
-suma_paquetes = suma_paquetes[['PLAZA', 'ID PLAZA', 'PAQUETES', 'FOLIOS', 'FECHA DE PEDIDO', 'FECHA DE ENTREGA', 'TIPO DE PEDIDO']]
-st.write(suma_paquetes)
+    # Reorganizar las columnas
+    suma_paquetes = suma_paquetes[['PLAZA', 'ID PLAZA', 'PAQUETES', 'FOLIOS', 'FECHA DE PEDIDO', 'FECHA DE ENTREGA', 'TIPO DE PEDIDO']]
+    st.write(suma_paquetes)
 
-# Opción para copiar el DataFrame
-st.title("Copiar DataFrame")
-csv = suma_paquetes.to_csv(index=False)
-st.download_button(
-    label="Copiar Tabla",
-    data=csv,
-    file_name='suma_paquetes.csv',
-    mime='text/csv',
-)
+    # Opción para copiar el DataFrame
+    st.title("Copiar DataFrame")
+    csv = suma_paquetes.to_csv(index=False)
+    st.download_button(
+        label="Copiar Tabla",
+        data=csv,
+        file_name='suma_paquetes.csv',
+        mime='text/csv',
+    )
+else:
+    st.error("Las columnas necesarias ('PLAZA BAT', 'FECHA DE PEDIDO', 'PAQUETES') no están presentes en el archivo subido.")
 
 # Paso 7: Crear gráficos de barras comparativos de paquetes por plaza BAT y sus límites
 st.title("Gráfica Comparativa de Paquetes por Plaza BAT")
