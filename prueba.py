@@ -60,56 +60,59 @@ if archivo_subido:
         st.write(f"Filtrado por {columna_filtrar}: {seleccion_filtrar}")
         st.write(dataframe_filtrado)
 
-    # Paso 4: Filtrar por cada plaza y guardar en archivos separados por fecha de pedido (sin la columna PAQUETES)
-    plazas = {
-        'REYNOSA': ('100 110', '9271'),
-        'MÉXICO': ('200', '9211'),
-        'JALISCO': ('300', '9221'),
-        'SALTILLO': ('400 410', '9261'),
-        'MONTERREY': ('500', '9201'),
-        'BAJA CALIFORNIA': ('600 610 620', '9231'),
-        'HERMOSILLO': ('650', '9251'),
-        'PUEBLA': ('700', '9291'),
-        'CUERNAVACA': ('720', '9281'),
-        'YUCATAN': ('800', '9241'),
-        'QUINTANA ROO': ('890', '9289')
-    }
+# Paso 4: Filtrar por cada plaza y guardar en archivos separados por fecha de pedido (sin la columna PAQUETES)
+plazas = {
+    'REYNOSA': ('100 110', '9271'),
+    'MÉXICO': ('200', '9211'),
+    'JALISCO': ('300', '9221'),
+    'SALTILLO': ('400 410', '9261'),
+    'MONTERREY': ('500', '9201'),
+    'BAJA CALIFORNIA': ('600 610 620', '9231'),
+    'HERMOSILLO': ('650', '9251'),
+    'PUEBLA': ('700', '9291'),
+    'CUERNAVACA': ('720', '9281'),
+    'YUCATAN': ('800', '9241'),
+    'QUINTANA ROO': ('890', '9289')
+}
 
-    # Crear carpeta si no existe
-    carpeta_destino = os.path.join(ruta_onedrive, "centralizados semanal BAT")
-    if not os.path.exists(carpeta_destino):
-        os.makedirs(carpeta_destino)
-        st.write(f"Carpeta '{carpeta_destino}' creada en OneDrive.")
+# Crear carpeta si no existe
+carpeta_destino = os.path.join(ruta_onedrive, "centralizados semanal BAT")
+if not os.path.exists(carpeta_destino):
+    os.makedirs(carpeta_destino)
+    st.write(f"Carpeta '{carpeta_destino}' creada en OneDrive.")
 
-    # Botón para guardar archivos
-    if st.button('Guardar Archivos'):
-        fechas_pedido = dataframe_bat['FECHA DE PEDIDO'].unique()
-        for fecha in fechas_pedido:
-            fecha_str = pd.to_datetime(fecha).strftime("%d%m%Y")
-            for plaza, (codigo, id_tienda) in plazas.items():
-                # Verificar la lógica de filtrado y mostrar mensajes de depuración
-                st.write(f"Procesando plaza: {plaza}, fecha: {fecha_str}")
-                if tipo_pedido == "complementario" and 'N TIENDA' in dataframe_bat.columns:
-                    df_plaza = dataframe_bat[(dataframe_bat['N TIENDA'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)][columnas_sin_paquetes]
-                    st.write(f"Filtrando por N TIENDA: {plaza}")
-                else:
-                    df_plaza = dataframe_bat[(dataframe_bat['PLAZA BAT'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)][columnas_sin_paquetes]
-                    st.write(f"Filtrando por PLAZA BAT: {plaza}")
+# Botón para guardar archivos
+if st.button('Guardar Archivos'):
+    fechas_pedido = dataframe_bat['FECHA DE PEDIDO'].unique()
+    for fecha in fechas_pedido:
+        fecha_str = pd.to_datetime(fecha).strftime("%d%m%Y")
+        for plaza, (codigo, id_tienda) in plazas.items():
+            # Mostrar un mensaje conciso indicando la plaza y la fecha
+            st.write(f"Procesando plaza: {plaza}, fecha: {fecha_str}")
+            
+            # Verificar la lógica de filtrado y mostrar mensajes de depuración concisos
+            if tipo_pedido == "complementario" and 'N TIENDA' in dataframe_bat.columns:
+                df_plaza = dataframe_bat[(dataframe_bat['N TIENDA'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)][columnas_sin_paquetes]
+                st.write(f"Filtrando por N TIENDA: {plaza}")
+            else:
+                df_plaza = dataframe_bat[(dataframe_bat['PLAZA BAT'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)][columnas_sin_paquetes]
+                st.write(f"Filtrando por PLAZA BAT: {plaza}")
 
-                st.write(f"Datos filtrados: {df_plaza}")
+            # Mostrar solo la cantidad de filas filtradas
+            st.write(f"Datos filtrados: {df_plaza.shape[0]} filas")
 
-                if not df_plaza.empty:
-                    df_plaza.insert(0, 'ID Tienda', id_tienda)  # Insertar la columna ID Tienda como la primera columna
-                    # Cambiar nombres de columnas
-                    df_plaza.columns = ['id Tienda', 'Codigo de Barras', 'Id Articulo', 'Descripcion', 'Unidad Empaque', 'Cantidad (Pza)']
-                    nombre_archivo = f"{codigo} {fecha_str}.csv"
-                    ruta_archivo = os.path.join(carpeta_destino, nombre_archivo)
-                    df_plaza.to_csv(ruta_archivo, index=False)
-                    st.write(f"Archivo guardado: {ruta_archivo}")
-                else:
-                    st.warning(f"No se encontraron datos para la {columna_filtrar} {plaza} en la fecha {fecha_str}")
-        st.write("Proceso completado.")
-
+            if not df_plaza.empty:
+                df_plaza.insert(0, 'ID Tienda', id_tienda)  # Insertar la columna ID Tienda como la primera columna
+                # Cambiar nombres de columnas
+                df_plaza.columns = ['id Tienda', 'Codigo de Barras', 'Id Articulo', 'Descripcion', 'Unidad Empaque', 'Cantidad (Pza)']
+                nombre_archivo = f"{codigo} {fecha_str}.csv"
+                ruta_archivo = os.path.join(carpeta_destino, nombre_archivo)
+                df_plaza.to_csv(ruta_archivo, index=False)
+                st.write(f"Archivo guardado: {ruta_archivo}")
+            else:
+                st.warning(f"No se encontraron datos para la {columna_filtrar} {plaza} en la fecha {fecha_str}")
+    st.write("Proceso completado.")
+  
     # Paso 6: Crear tabla con la suma de paquetes para cada PLAZA BAT
     st.title("Tabla de Suma de Paquetes por PLAZA BAT")
 
