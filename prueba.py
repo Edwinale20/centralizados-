@@ -90,7 +90,8 @@ if archivo_subido:
 
             if not df_plaza.empty:
                 if tipo_pedido == "complementario" and 'N TIENDA' in dataframe_bat.columns:
-                    df_plaza.insert(0, 'ID Tienda', df_plaza['N TIENDA'] if 'N TIENDA' in df_plaza.columns else id_tienda)  # Usar la columna 'N TIENDA' del archivo subido
+                    if 'N TIENDA' in df_plaza.columns:
+                        df_plaza.insert(0, 'ID Tienda', df_plaza['N TIENDA'])  # Usar la columna 'N TIENDA' del archivo subido
                 else:
                     df_plaza.insert(0, 'ID Tienda', id_tienda)  # Insertar la columna ID Tienda como la primera columna
                 
@@ -112,129 +113,130 @@ if archivo_subido:
         )
     st.write("Proceso completado.")
 
-# Paso 6: Crear tabla con la suma de paquetes para cada PLAZA BAT
-st.title("Tabla de Suma de Paquetes por PLAZA BAT")
+    # Paso 6: Crear tabla con la suma de paquetes para cada PLAZA BAT
+    st.title("Tabla de Suma de Paquetes por PLAZA BAT")
 
-# Verificar que las columnas necesarias existan en el DataFrame y no contengan valores nulos
-if 'PLAZA BAT' in dataframe_bat.columns and 'FECHA DE PEDIDO' in dataframe_bat.columns and 'PAQUETES' in dataframe_bat.columns:
-    # Eliminar filas con valores nulos en las columnas de interés
-    dataframe_bat = dataframe_bat.dropna(subset=['PLAZA BAT', 'FECHA DE PEDIDO', 'PAQUETES'])
-    
-    # Asegurarse de que las columnas tienen el tipo de dato correcto
-    dataframe_bat['PLAZA BAT'] = dataframe_bat['PLAZA BAT'].astype(str)
-    dataframe_bat['FECHA DE PEDIDO'] = pd.to_datetime(dataframe_bat['FECHA DE PEDIDO'], errors='coerce')
-    dataframe_bat['PAQUETES'] = pd.to_numeric(dataframe_bat['PAQUETES'], errors='coerce')
-    
-    # Verificar que no haya valores nulos después de la conversión
-    dataframe_bat = dataframe_bat.dropna(subset=['PLAZA BAT', 'FECHA DE PEDIDO', 'PAQUETES'])
+    # Verificar que las columnas necesarias existan en el DataFrame y no contengan valores nulos
+    if 'PLAZA BAT' in dataframe_bat.columns and 'FECHA DE PEDIDO' in dataframe_bat.columns and 'PAQUETES' in dataframe_bat.columns:
+        # Eliminar filas con valores nulos en las columnas de interés
+        dataframe_bat = dataframe_bat.dropna(subset=['PLAZA BAT', 'FECHA DE PEDIDO', 'PAQUETES'])
+        
+        # Asegurarse de que las columnas tienen el tipo de dato correcto
+        dataframe_bat['PLAZA BAT'] = dataframe_bat['PLAZA BAT'].astype(str)
+        dataframe_bat['FECHA DE PEDIDO'] = pd.to_datetime(dataframe_bat['FECHA DE PEDIDO'], errors='coerce')
+        dataframe_bat['PAQUETES'] = pd.to_numeric(dataframe_bat['PAQUETES'], errors='coerce')
+        
+        # Verificar que no haya valores nulos después de la conversión
+        dataframe_bat = dataframe_bat.dropna(subset=['PLAZA BAT', 'FECHA DE PEDIDO', 'PAQUETES'])
 
-    # Calcular la suma de paquetes para cada PLAZA BAT
-    suma_paquetes = dataframe_bat.groupby(['PLAZA BAT', 'FECHA DE PEDIDO'])['PAQUETES'].sum().reset_index()
-    suma_paquetes.columns = ['PLAZA', 'FECHA DE PEDIDO', 'PAQUETES']
+        # Calcular la suma de paquetes para cada PLAZA BAT
+        suma_paquetes = dataframe_bat.groupby(['PLAZA BAT', 'FECHA DE PEDIDO'])['PAQUETES'].sum().reset_index()
+        suma_paquetes.columns = ['PLAZA', 'FECHA DE PEDIDO', 'PAQUETES']
 
-    # Formatear las fechas para que no incluyan la hora
-    suma_paquetes['FECHA DE PEDIDO'] = suma_paquetes['FECHA DE PEDIDO'].dt.strftime('%Y-%m-%d')
-    suma_paquetes['FECHA DE ENTREGA'] = (pd.to_datetime(suma_paquetes['FECHA DE PEDIDO']) + pd.to_timedelta(1, unit='d')).dt.strftime('%Y-%m-%d')
+        # Formatear las fechas para que no incluyan la hora
+        suma_paquetes['FECHA DE PEDIDO'] = suma_paquetes['FECHA DE PEDIDO'].dt.strftime('%Y-%m-%d')
+        suma_paquetes['FECHA DE ENTREGA'] = (pd.to_datetime(suma_paquetes['FECHA DE PEDIDO']) + pd.to_timedelta(1, unit='d')).dt.strftime('%Y-%m-%d')
 
-    # Crear tabla con columnas adicionales vacías
-    suma_paquetes['ID PLAZA'] = suma_paquetes['PLAZA'].map(lambda x: plazas.get(x, ('', ''))[0])
-    suma_paquetes['FOLIOS'] = ''
-    suma_paquetes['TIPO DE PEDIDO'] = tipo_pedido.capitalize()
+        # Crear tabla con columnas adicionales vacías
+        suma_paquetes['ID PLAZA'] = suma_paquetes['PLAZA'].map(lambda x: plazas.get(x, ('', ''))[0])
+        suma_paquetes['FOLIOS'] = ''
+        suma_paquetes['TIPO DE PEDIDO'] = tipo_pedido.capitalize()
 
-    # Ordenar las plazas de menor a mayor y las fechas de menor a mayor dentro de cada plaza
-    orden_plazas = ['REYNOSA', 'MÉXICO', 'JALISCO', 'SALTILLO', 'MONTERREY', 'BAJA CALIFORNIA', 'HERMOSILLO', 'PUEBLA', 'CUERNAVACA', 'YUCATAN', 'QUINTANA ROO']
-    suma_paquetes['PLAZA'] = pd.Categorical(suma_paquetes['PLAZA'], categories=orden_plazas, ordered=True)
-    suma_paquetes = suma_paquetes.sort_values(['PLAZA', 'FECHA DE PEDIDO'])
+        # Ordenar las plazas de menor a mayor y las fechas de menor a mayor dentro de cada plaza
+        orden_plazas = ['REYNOSA', 'MÉXICO', 'JALISCO', 'SALTILLO', 'MONTERREY', 'BAJA CALIFORNIA', 'HERMOSILLO', 'PUEBLA', 'CUERNAVACA', 'YUCATAN', 'QUINTANA ROO']
+        suma_paquetes['PLAZA'] = pd.Categorical(suma_paquetes['PLAZA'], categories=orden_plazas, ordered=True)
+        suma_paquetes = suma_paquetes.sort_values(['PLAZA', 'FECHA DE PEDIDO'])
 
-    # Reorganizar las columnas
-    suma_paquetes = suma_paquetes[['PLAZA', 'ID PLAZA', 'PAQUETES', 'FOLIOS', 'FECHA DE PEDIDO', 'FECHA DE ENTREGA', 'TIPO DE PEDIDO']]
-    st.write(suma_paquetes)
+        # Reorganizar las columnas
+        suma_paquetes = suma_paquetes[['PLAZA', 'ID PLAZA', 'PAQUETES', 'FOLIOS', 'FECHA DE PEDIDO', 'FECHA DE ENTREGA', 'TIPO DE PEDIDO']]
+        st.write(suma_paquetes)
 
-    # Opción para copiar el DataFrame
-    st.title("Copiar DataFrame")
-    csv = suma_paquetes.to_csv(index=False)
-    st.download_button(
-        label="Copiar Tabla",
-        data=csv,
-        file_name='suma_paquetes.csv',
-        mime='text/csv',
-    )
-else:
-    st.error("Las columnas necesarias ('PLAZA BAT', 'FECHA DE PEDIDO', 'PAQUETES') no están presentes en el archivo subido.")
+        # Opción para copiar el DataFrame
+        st.title("Copiar DataFrame")
+        csv = suma_paquetes.to_csv(index=False)
+        st.download_button(
+            label="Copiar Tabla",
+            data=csv,
+            file_name='suma_paquetes.csv',
+            mime='text/csv',
+        )
+    else:
+        st.error("Las columnas necesarias ('PLAZA BAT', 'FECHA DE PEDIDO', 'PAQUETES') no están presentes en el archivo subido.")
 
-# Paso 7: Crear gráficos de barras comparativos de paquetes por plaza BAT y sus límites
-import plotly.figure_factory as ff
-import plotly.graph_objects as go
+    # Paso 7: Crear gráficos de barras comparativos de paquetes por plaza BAT y sus límites
+    import plotly.figure_factory as ff
+    import plotly.graph_objects as go
 
-st.title("Gráfica Comparativa de Paquetes por Plaza BAT")
+    st.title("Gráfica Comparativa de Paquetes por Plaza BAT")
 
-# Definir límites de paquetes por plaza
-limites_paquetes = {
-    'Noreste': 22000,
-    'MÉXICO': 8000,
-    'PENÍNSULA': 2000,
-    'HERMOSILLO': 2000,
-    'JALISCO': 4000,
-    'BAJA CALIFORNIA': 4000
-}
+    # Definir límites de paquetes por plaza
+    limites_paquetes = {
+        'Noreste': 22000,
+        'MÉXICO': 8000,
+        'PENÍNSULA': 2000,
+        'HERMOSILLO': 2000,
+        'JALISCO': 4000,
+        'BAJA CALIFORNIA': 4000
+    }
 
-# Calcular la suma de paquetes por agrupaciones específicas
-paquetes_noreste = suma_paquetes[suma_paquetes['PLAZA'].isin(['REYNOSA', 'MONTERREY', 'SALTILLO'])]['PAQUETES'].sum()
-paquetes_peninsula = suma_paquetes[suma_paquetes['PLAZA'].isin(['YUCATAN', 'QUINTANA ROO'])]['PAQUETES'].sum()
-paquetes_mexico = suma_paquetes[suma_paquetes['PLAZA'].isin(['MÉXICO', 'PUEBLA', 'CUERNAVACA'])]['PAQUETES'].sum()
+    # Calcular la suma de paquetes por agrupaciones específicas
+    paquetes_noreste = suma_paquetes[suma_paquetes['PLAZA'].isin(['REYNOSA', 'MONTERREY', 'SALTILLO'])]['PAQUETES'].sum()
+    paquetes_peninsula = suma_paquetes[suma_paquetes['PLAZA'].isin(['YUCATAN', 'QUINTANA ROO'])]['PAQUETES'].sum()
+    paquetes_mexico = suma_paquetes[suma_paquetes['PLAZA'].isin(['MÉXICO', 'PUEBLA', 'CUERNAVACA'])]['PAQUETES'].sum()
 
-# Crear un nuevo DataFrame con las agrupaciones
-data = {
-    'Plaza': ['Noreste', 'MÉXICO', 'PENÍNSULA', 'HERMOSILLO', 'JALISCO', 'BAJA CALIFORNIA'],
-    'Paquetes': [
-        paquetes_noreste,
-        paquetes_mexico,
-        paquetes_peninsula,
-        suma_paquetes[suma_paquetes['PLAZA'] == 'HERMOSILLO']['PAQUETES'].sum(),
-        suma_paquetes[suma_paquetes['PLAZA'] == 'JALISCO']['PAQUETES'].sum(),
-        suma_paquetes[suma_paquetes['PLAZA'] == 'BAJA CALIFORNIA']['PAQUETES'].sum()
-    ],
-    'Límite': [22000, 8000, 2000, 2000, 4000, 4000]
-}
+    # Crear un nuevo DataFrame con las agrupaciones
+    data = {
+        'Plaza': ['Noreste', 'MÉXICO', 'PENÍNSULA', 'HERMOSILLO', 'JALISCO', 'BAJA CALIFORNIA'],
+        'Paquetes': [
+            paquetes_noreste,
+            paquetes_mexico,
+            paquetes_peninsula,
+            suma_paquetes[suma_paquetes['PLAZA'] == 'HERMOSILLO']['PAQUETES'].sum(),
+            suma_paquetes[suma_paquetes['PLAZA'] == 'JALISCO']['PAQUETES'].sum(),
+            suma_paquetes[suma_paquetes['PLAZA'] == 'BAJA CALIFORNIA']['PAQUETES'].sum()
+        ],
+        'Límite': [22000, 8000, 2000, 2000, 4000, 4000]
+    }
 
-df_comparativa = pd.DataFrame(data)
+    df_comparativa = pd.DataFrame(data)
 
-# Crear una tabla para la comparación
-table_data = [['Plaza', 'Paquetes', 'Límite']] + df_comparativa.values.tolist()
+    # Crear una tabla para la comparación
+    table_data = [['Plaza', 'Paquetes', 'Límite']] + df_comparativa.values.tolist()
 
-# Inicializar la figura con la tabla
-fig = ff.create_table(table_data, height_constant=60)
+    # Inicializar la figura con la tabla
+    fig = ff.create_table(table_data, height_constant=60)
 
-# Crear trazos para la gráfica de barras
-trace1 = go.Bar(x=df_comparativa['Plaza'], y=df_comparativa['Paquetes'], xaxis='x2', yaxis='y2',
-                marker=dict(color='darkorange'),
-                name='Paquetes')
-trace2 = go.Bar(x=df_comparativa['Plaza'], y=df_comparativa['Límite'], xaxis='x2', yaxis='y2',
-                marker=dict(color='green'),
-                name='Límite')
+    # Crear trazos para la gráfica de barras
+    trace1 = go.Bar(x=df_comparativa['Plaza'], y=df_comparativa['Paquetes'], xaxis='x2', yaxis='y2',
+                    marker=dict(color='darkorange'),
+                    name='Paquetes')
+    trace2 = go.Bar(x=df_comparativa['Plaza'], y=df_comparativa['Límite'], xaxis='x2', yaxis='y2',
+                    marker=dict(color='green'),
+                    name='Límite')
 
-# Añadir trazos a la figura
-fig.add_traces([trace1, trace2])
+    # Añadir trazos a la figura
+    fig.add_traces([trace1, trace2])
 
-# Inicializar ejes x2 y y2
-fig['layout']['xaxis2'] = {}
-fig['layout']['yaxis2'] = {}
+    # Inicializar ejes x2 y y2
+    fig['layout']['xaxis2'] = {}
+    fig['layout']['yaxis2'] = {}
 
-# Editar el diseño para subplots
-fig.layout.yaxis.update({'domain': [0, .45]})
-fig.layout.yaxis2.update({'domain': [.6, 1]})
+    # Editar el diseño para subplots
+    fig.layout.yaxis.update({'domain': [0, .45]})
+    fig.layout.yaxis2.update({'domain': [.6, 1]})
 
-# Anclar los ejes x2 y y2
-fig.layout.yaxis2.update({'anchor': 'x2'})
-fig.layout.xaxis2.update({'anchor': 'y2'})
-fig.layout.yaxis2.update({'title': 'Cantidad de Paquetes'})
+    # Anclar los ejes x2 y y2
+    fig.layout.yaxis2.update({'anchor': 'x2'})
+    fig.layout.xaxis2.update({'anchor': 'y2'})
+    fig.layout.yaxis2.update({'title': 'Cantidad de Paquetes'})
 
-# Actualizar los márgenes para añadir título y ver las etiquetas
-fig.layout.margin.update({'t':75, 'l':50})
-fig.layout.update({'title': 'Comparativa de Paquetes por Plaza BAT'})
+    # Actualizar los márgenes para añadir título y ver las etiquetas
+    fig.layout.margin.update({'t':75, 'l':50})
+    fig.layout.update({'title': 'Comparativa de Paquetes por Plaza BAT'})
 
-# Actualizar la altura debido a la interacción con la tabla
-fig.layout.update({'height':800})
+    # Actualizar la altura debido a la interacción con la tabla
+    fig.layout.update({'height':800})
 
-# Mostrar la gráfica en Streamlit
-st.plotly_chart(fig)
+    # Mostrar la gráfica en Streamlit
+    st.plotly_chart(fig)
+
