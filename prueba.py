@@ -59,17 +59,17 @@ if archivo_subido:
 
     # Paso 4: Filtrar por cada plaza y guardar en archivos separados por fecha de pedido (sin la columna PAQUETES)
     plazas = {
-        'REYNOSA': ('100 110', '9271'),
-        'MÉXICO': ('200', '9211'),
-        'JALISCO': ('300', '9221'),
-        'SALTILLO': ('400 410', '9261'),
-        'MONTERREY': ('500', '9201'),
-        'BAJA CALIFORNIA': ('600 610 620', '9231'),
-        'HERMOSILLO': ('650', '9251'),
-        'PUEBLA': ('700', '9291'),
-        'CUERNAVACA': ('720', '9281'),
-        'YUCATAN': ('800', '9241'),
-        'QUINTANA ROO': ('890', '9289')
+        'REYNOSA': '100 110',
+        'MÉXICO': '200',
+        'JALISCO': '300',
+        'SALTILLO': '400 410',
+        'MONTERREY': '500',
+        'BAJA CALIFORNIA': '600 610 620',
+        'HERMOSILLO': '650',
+        'PUEBLA': '700',
+        'CUERNAVACA': '720',
+        'YUCATAN': '800',
+        'QUINTANA ROO': '890'
     }
 
     archivos_generados = []
@@ -77,13 +77,9 @@ if archivo_subido:
     for fecha in fechas_pedido:
         fecha_str = pd.to_datetime(fecha).strftime("%d%m%Y")
         
-        for plaza, (codigo, id_tienda) in plazas.items():
-            # Ajustar lógica de filtrado según el tipo de pedido
-            if tipo_pedido == "stock" and 'N TIENDA' in dataframe_bat.columns:
-                if plaza in dataframe_bat['N TIENDA'].values:
-                    df_plaza = dataframe_bat[(dataframe_bat['N TIENDA'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)][columnas_sin_paquetes]
-                else:
-                    df_plaza = pd.DataFrame()  # Si no hay coincidencia, crea un DataFrame vacío
+        for plaza, codigo in plazas.items():
+            if tipo_pedido == "complementario" and 'N TIENDA' in dataframe_bat.columns:
+                df_plaza = dataframe_bat[(dataframe_bat['PLAZA BAT'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)]
             else:
                 df_plaza = dataframe_bat[(dataframe_bat['PLAZA BAT'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)][columnas_sin_paquetes]
 
@@ -91,9 +87,10 @@ if archivo_subido:
                 if tipo_pedido == "complementario" and 'N TIENDA' in df_plaza.columns:
                     df_plaza.insert(0, 'ID Tienda', df_plaza['N TIENDA'])
                 else:
-                    df_plaza.insert(0, 'ID Tienda', id_tienda)  # Insertar la columna ID Tienda como la primera columna
+                    df_plaza.insert(0, 'ID Tienda', codigo)
                 
                 # Cambiar nombres de columnas
+                df_plaza = df_plaza[['ID Tienda'] + columnas_sin_paquetes]
                 df_plaza.columns = ['ID Tienda', 'Codigo de Barras', 'Id Articulo', 'Descripcion', 'Unidad Empaque', 'Cantidad (Pza)']
                 nombre_archivo = f"{codigo} {fecha_str}.csv"
                 archivos_generados.append((nombre_archivo, df_plaza))
@@ -136,7 +133,7 @@ if 'PLAZA BAT' in dataframe_bat.columns and 'FECHA DE PEDIDO' in dataframe_bat.c
     suma_paquetes['FECHA DE ENTREGA'] = (pd.to_datetime(suma_paquetes['FECHA DE PEDIDO']) + pd.to_timedelta(1, unit='d')).dt.strftime('%Y-%m-%d')
 
     # Crear tabla con columnas adicionales vacías
-    suma_paquetes['ID PLAZA'] = suma_paquetes['PLAZA'].map(lambda x: plazas.get(x, ('', ''))[0])
+    suma_paquetes['ID PLAZA'] = suma_paquetes['PLAZA'].map(lambda x: plazas.get(x, ''))
     suma_paquetes['FOLIOS'] = ''
     suma_paquetes['TIPO DE PEDIDO'] = tipo_pedido.capitalize()
 
@@ -237,5 +234,4 @@ fig.layout.update({'height':800})
 
 # Mostrar la gráfica en Streamlit
 st.plotly_chart(fig)
-
 
