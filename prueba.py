@@ -89,7 +89,11 @@ if archivo_subido:
                 df_plaza = dataframe_bat[(dataframe_bat['PLAZA BAT'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)][columnas_sin_paquetes]
 
             if not df_plaza.empty:
-                df_plaza.insert(0, 'ID Tienda', id_tienda)  # Insertar la columna ID Tienda como la primera columna
+                if tipo_pedido == "complementario" and 'N TIENDA' in dataframe_bat.columns:
+                    df_plaza.insert(0, 'ID Tienda', df_plaza['N TIENDA'])  # Usar la columna 'N TIENDA' del archivo subido
+                else:
+                    df_plaza.insert(0, 'ID Tienda', id_tienda)  # Insertar la columna ID Tienda como la primera columna
+                
                 # Cambiar nombres de columnas
                 df_plaza.columns = ['id Tienda', 'Codigo de Barras', 'Id Articulo', 'Descripcion', 'Unidad Empaque', 'Cantidad (Pza)']
                 nombre_archivo = f"{codigo} {fecha_str}.csv"
@@ -234,8 +238,3 @@ fig.layout.update({'height':800})
 
 # Mostrar la gráfica en Streamlit
 st.plotly_chart(fig)
-
-
-# Mostrar la gráfica en Streamlit
-st.plotly_chart(fig)
-
