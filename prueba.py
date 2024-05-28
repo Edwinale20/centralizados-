@@ -234,4 +234,3 @@ fig.layout.update({'height':800})
 
 # Mostrar la gráfica en Streamlit
 st.plotly_chart(fig)
-
