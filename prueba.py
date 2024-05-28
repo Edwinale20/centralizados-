@@ -44,7 +44,7 @@ if archivo_subido:
     st.title("Filtrar por PLAZA BAT o N TIENDA")
 
     # Determinar la columna para filtrar
-    columna_filtrar = 'N TIENDA' if 'N TIENDA' in dataframe_bat.columns else 'PLAZA BAT'
+    columna_filtrar = 'N TIENDA' if 'N TIENDA' in dataframe_bat.columns and tipo_pedido == "stock" else 'PLAZA BAT'
 
     # Input de usuario para seleccionar la PLAZA BAT o N TIENDA
     if columna_filtrar in dataframe_bat.columns:
@@ -80,7 +80,7 @@ if archivo_subido:
         
         for plaza, (codigo, id_tienda) in plazas.items():
             # Ajustar lógica de filtrado según el tipo de pedido
-            if tipo_pedido == "complementario" and 'N TIENDA' in dataframe_bat.columns:
+            if tipo_pedido == "stock" and 'N TIENDA' in dataframe_bat.columns:
                 if plaza in dataframe_bat['N TIENDA'].values:
                     df_plaza = dataframe_bat[(dataframe_bat['N TIENDA'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)][columnas_sin_paquetes]
                 else:
@@ -122,7 +122,7 @@ if 'PLAZA BAT' in dataframe_bat.columns and 'FECHA DE PEDIDO' in dataframe_bat.c
     dataframe_bat['PAQUETES'] = pd.to_numeric(dataframe_bat['PAQUETES'], errors='coerce')
     
     # Verificar que no haya valores nulos después de la conversión
-    dataframe_bat = dataframe_bat.dropna(subset=['PLAZA BAT', 'FECHA DE PEDIDO', 'PAQUETES'])
+    dataframe_bat = dataframe_bat.dropna(subset(['PLAZA BAT', 'FECHA DE PEDIDO', 'PAQUETES'])
 
     # Calcular la suma de paquetes para cada PLAZA BAT
     suma_paquetes = dataframe_bat.groupby(['PLAZA BAT', 'FECHA DE PEDIDO'])['PAQUETES'].sum().reset_index()
@@ -133,7 +133,7 @@ if 'PLAZA BAT' in dataframe_bat.columns and 'FECHA DE PEDIDO' in dataframe_bat.c
     suma_paquetes['FECHA DE ENTREGA'] = (pd.to_datetime(suma_paquetes['FECHA DE PEDIDO']) + pd.to_timedelta(1, unit='d')).dt.strftime('%Y-%m-%d')
 
     # Crear tabla con columnas adicionales vacías
-    suma_paquetes['ID PLAZA'] = suma_paquetes['PLAZA'].map(lambda x: plazas[x][0])
+    suma_paquetes['ID PLAZA'] = suma_paquetes['PLAZA'].map(lambda x: plazas.get(x, ('', ''))[0])
     suma_paquetes['FOLIOS'] = ''
     suma_paquetes['TIPO DE PEDIDO'] = tipo_pedido.capitalize()
 
@@ -234,3 +234,4 @@ fig.layout.update({'height':800})
 
 # Mostrar la gráfica en Streamlit
 st.plotly_chart(fig)
+
