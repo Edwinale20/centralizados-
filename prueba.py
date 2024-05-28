@@ -90,12 +90,12 @@ if archivo_subido:
 
             if not df_plaza.empty:
                 if tipo_pedido == "complementario" and 'N TIENDA' in dataframe_bat.columns:
-                    df_plaza.insert(0, 'ID Tienda', df_plaza['N TIENDA'])  # Usar la columna 'N TIENDA' del archivo subido
+                    df_plaza.insert(0, 'ID Tienda', df_plaza['N TIENDA'] if 'N TIENDA' in df_plaza.columns else id_tienda)  # Usar la columna 'N TIENDA' del archivo subido
                 else:
                     df_plaza.insert(0, 'ID Tienda', id_tienda)  # Insertar la columna ID Tienda como la primera columna
                 
                 # Cambiar nombres de columnas
-                df_plaza.columns = ['id Tienda', 'Codigo de Barras', 'Id Articulo', 'Descripcion', 'Unidad Empaque', 'Cantidad (Pza)']
+                df_plaza.columns = ['ID Tienda', 'Codigo de Barras', 'Id Articulo', 'Descripcion', 'Unidad Empaque', 'Cantidad (Pza)']
                 nombre_archivo = f"{codigo} {fecha_str}.csv"
                 archivos_generados.append((nombre_archivo, df_plaza))
 
