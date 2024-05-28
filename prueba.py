@@ -137,10 +137,10 @@ if 'PLAZA BAT' in dataframe_bat.columns and 'FECHA DE PEDIDO' in dataframe_bat.c
     suma_paquetes['FOLIOS'] = ''
     suma_paquetes['TIPO DE PEDIDO'] = tipo_pedido.capitalize()
 
-    # Ordenar las plazas de menor a mayor
+    # Ordenar las plazas de menor a mayor y las fechas de menor a mayor dentro de cada plaza
     orden_plazas = ['REYNOSA', 'MÉXICO', 'JALISCO', 'SALTILLO', 'MONTERREY', 'BAJA CALIFORNIA', 'HERMOSILLO', 'PUEBLA', 'CUERNAVACA', 'YUCATAN', 'QUINTANA ROO']
     suma_paquetes['PLAZA'] = pd.Categorical(suma_paquetes['PLAZA'], categories=orden_plazas, ordered=True)
-    suma_paquetes = suma_paquetes.sort_values('PLAZA')
+    suma_paquetes = suma_paquetes.sort_values(['PLAZA', 'FECHA DE PEDIDO'])
 
     # Reorganizar las columnas
     suma_paquetes = suma_paquetes[['PLAZA', 'ID PLAZA', 'PAQUETES', 'FOLIOS', 'FECHA DE PEDIDO', 'FECHA DE ENTREGA', 'TIPO DE PEDIDO']]
@@ -231,6 +231,10 @@ fig.layout.update({'title': 'Comparativa de Paquetes por Plaza BAT'})
 
 # Actualizar la altura debido a la interacción con la tabla
 fig.layout.update({'height':800})
+
+# Mostrar la gráfica en Streamlit
+st.plotly_chart(fig)
+
 
 # Mostrar la gráfica en Streamlit
 st.plotly_chart(fig)
