@@ -1,4 +1,3 @@
-# Paso 1: Importar las librerías necesarias
 import pandas as pd
 import openpyxl
 import csv
@@ -7,10 +6,10 @@ import os
 import plotly.graph_objects as go
 from io import BytesIO
 
-# Paso 2: Subir el archivo semanal "centralizado BAT" desde la interfaz de Streamlit
+# Paso 1: Importar las librerías necesarias
 st.title("Carga y proceso de 'centralizado BAT'")
 
-# Opción para cargar el archivo
+# Paso 2: Subir el archivo semanal "centralizado BAT" desde la interfaz de Streamlit
 archivo_subido = st.file_uploader("Sube el archivo", type=["xlsx"])
 
 # Opción para elegir el tipo de pedido
@@ -89,14 +88,13 @@ if archivo_subido:
                 df_plaza = dataframe_bat[(dataframe_bat['PLAZA BAT'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)][columnas_sin_paquetes]
 
             if not df_plaza.empty:
-                if tipo_pedido == "complementario" and 'N TIENDA' in dataframe_bat.columns:
-                    df_plaza.insert(0, 'ID Tienda', df_plaza['N TIENDA'] if 'N TIENDA' in df_plaza.columns else id_tienda)  # Usar la columna 'N TIENDA' del archivo subido
+                if tipo_pedido == "complementario" and 'N TIENDA' in df_plaza.columns:
+                    df_plaza.insert(0, 'ID Tienda', df_plaza['N TIENDA'])
                 else:
                     df_plaza.insert(0, 'ID Tienda', id_tienda)  # Insertar la columna ID Tienda como la primera columna
                 
                 # Cambiar nombres de columnas
-                if len(df_plaza.columns) == 7:  # Verificar el número de columnas antes de renombrar
-                    df_plaza.columns = ['ID Tienda', 'Codigo de Barras', 'Id Articulo', 'Descripcion', 'Unidad Empaque', 'Cantidad (Pza)']
+                df_plaza.columns = ['ID Tienda', 'Codigo de Barras', 'Id Articulo', 'Descripcion', 'Unidad Empaque', 'Cantidad (Pza)']
                 nombre_archivo = f"{codigo} {fecha_str}.csv"
                 archivos_generados.append((nombre_archivo, df_plaza))
 
