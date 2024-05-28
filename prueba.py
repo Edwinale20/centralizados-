@@ -9,7 +9,7 @@ from io import BytesIO
 
 # Paso 2: Subir el archivo semanal "centralizado BAT" desde la interfaz de Streamlit
 st.title("Carga y proceso de 'centralizado BAT'")
-  
+
 # Opción para cargar el archivo
 archivo_subido = st.file_uploader("Sube el archivo", type=["xlsx"])
 
@@ -122,7 +122,7 @@ if 'PLAZA BAT' in dataframe_bat.columns and 'FECHA DE PEDIDO' in dataframe_bat.c
     dataframe_bat['PAQUETES'] = pd.to_numeric(dataframe_bat['PAQUETES'], errors='coerce')
     
     # Verificar que no haya valores nulos después de la conversión
-    dataframe_bat = dataframe_bat.dropna(subset(['PLAZA BAT', 'FECHA DE PEDIDO', 'PAQUETES'])
+    dataframe_bat = dataframe_bat.dropna(subset=['PLAZA BAT', 'FECHA DE PEDIDO', 'PAQUETES'])
 
     # Calcular la suma de paquetes para cada PLAZA BAT
     suma_paquetes = dataframe_bat.groupby(['PLAZA BAT', 'FECHA DE PEDIDO'])['PAQUETES'].sum().reset_index()
@@ -234,3 +234,4 @@ fig.layout.update({'height':800})
 
 # Mostrar la gráfica en Streamlit
 st.plotly_chart(fig)
+
