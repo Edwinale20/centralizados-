@@ -72,6 +72,20 @@ if archivo_subido:
         'QUINTANA ROO': '890'
     }
 
+    codigos_plaza = {
+        'REYNOSA': '9271',
+        'MÉXICO': '9211',
+        'JALISCO': '9221',
+        'SALTILLO': '9261',
+        'MONTERREY': '9201',
+        'BAJA CALIFORNIA': '9231',
+        'HERMOSILLO': '9251',
+        'PUEBLA': '9291',
+        'CUERNAVACA': '9281',
+        'YUCATAN': '9241',
+        'QUINTANA ROO': '9289'
+    }
+
     archivos_generados = []
     fechas_pedido = dataframe_bat['FECHA DE PEDIDO'].unique()
     for fecha in fechas_pedido:
@@ -85,14 +99,14 @@ if archivo_subido:
 
             if not df_plaza.empty:
                 if tipo_pedido == "complementario" and 'N TIENDA' in df_plaza.columns:
-                    df_plaza.insert(0, 'ID Tienda', df_plaza['N TIENDA'])
+                    df_plaza.insert(0, 'id Tienda', df_plaza['N TIENDA'])
                 else:
-                    df_plaza.insert(0, 'ID Tienda', codigo)
+                    df_plaza.insert(0, 'id Tienda', codigos_plaza[plaza])
                 
                 # Cambiar nombres de columnas
-                df_plaza = df_plaza[['ID Tienda'] + columnas_sin_paquetes]
-                df_plaza.columns = ['ID Tienda', 'Codigo de Barras', 'Id Articulo', 'Descripcion', 'Unidad Empaque', 'Cantidad (Pza)']
-                nombre_archivo = f"{codigo} {fecha_str}.csv"
+                df_plaza = df_plaza[['id Tienda'] + columnas_sin_paquetes]
+                df_plaza.columns = ['id Tienda', 'Codigo de Barras', 'Id Articulo', 'Descripcion', 'Unidad Empaque', 'Cantidad (Pza)']
+                nombre_archivo = f"{codigos_plaza[plaza]} {fecha_str}.csv"
                 archivos_generados.append((nombre_archivo, df_plaza))
 
     # Botón para descargar archivos
