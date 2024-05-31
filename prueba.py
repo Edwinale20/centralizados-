@@ -91,11 +91,8 @@ if archivo_subido:
     for fecha in fechas_pedido:
         fecha_str = pd.to_datetime(fecha).strftime("%d%m%Y")
         
-        for plaza, codigo in plazas.items():
-            if tipo_pedido == "complementario" and 'N TIENDA' in dataframe_bat.columns:
-                df_plaza = dataframe_bat[(dataframe_bat['PLAZA BAT'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)]
-            else:
-                df_plaza = dataframe_bat[(dataframe_bat['PLAZA BAT'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)][columnas_sin_paquetes]
+        for plaza, numeros_plaza in plazas.items():
+            df_plaza = dataframe_bat[(dataframe_bat['PLAZA BAT'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)][columnas_sin_paquetes]
 
             if not df_plaza.empty:
                 if tipo_pedido == "complementario" and 'N TIENDA' in df_plaza.columns:
@@ -106,7 +103,7 @@ if archivo_subido:
                 # Cambiar nombres de columnas
                 df_plaza = df_plaza[['id Tienda'] + columnas_sin_paquetes]
                 df_plaza.columns = ['id Tienda', 'Codigo de Barras', 'Id Articulo', 'Descripcion', 'Unidad Empaque', 'Cantidad (Pza)']
-                nombre_archivo = f"{codigos_plaza[plaza]} {fecha_str}.csv"
+                nombre_archivo = f"{numeros_plaza} {fecha_str}.csv"
                 archivos_generados.append((nombre_archivo, df_plaza))
 
     # Botón para descargar archivos
@@ -248,4 +245,3 @@ fig.layout.update({'height':800})
 
 # Mostrar la gráfica en Streamlit
 st.plotly_chart(fig)
-
