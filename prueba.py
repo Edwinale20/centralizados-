@@ -95,8 +95,8 @@ if archivo_subido:
             df_plaza = dataframe_bat[(dataframe_bat['PLAZA BAT'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)][columnas_sin_paquetes]
 
             if not df_plaza.empty:
-                if tipo_pedido == "complementario" and 'N TIENDA' in df_plaza.columns:
-                    df_plaza.insert(0, 'id Tienda', df_plaza['N TIENDA'])
+                if tipo_pedido == "complementario" and 'N TIENDA' in dataframe_bat.columns:
+                    df_plaza.insert(0, 'id Tienda', dataframe_bat['N TIENDA'])
                 else:
                     df_plaza.insert(0, 'id Tienda', codigos_plaza[plaza])
                 
