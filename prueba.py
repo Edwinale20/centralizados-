@@ -12,6 +12,10 @@ st.title("Carga y proceso de 'centralizado BAT'")
 # Paso 2: Subir el archivo semanal "centralizado BAT" desde la interfaz de Streamlit
 archivo_subido = st.file_uploader("Sube el archivo", type=["xlsx"])
 
+if archivo_subido is None:
+    st.info(" Sube el archivo de centralizado", icon = "i")
+    st.stop()
+
 # Opción para elegir el tipo de pedido
 tipo_pedido = st.selectbox("Selecciona el tipo de pedido:", ["stock", "complementario"])
 
