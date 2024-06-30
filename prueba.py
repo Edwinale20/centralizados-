@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 from io import BytesIO
 
 # Paso 1: Importar las librerías necesarias
-st.title("Carga y proceso de 'centralizado BAT'")
+st.title("Carga y proceso de centralizado BAT")
 
 # Paso 2: Subir el archivo semanal "centralizado BAT" desde la interfaz de Streamlit
 archivo_subido = st.file_uploader("Sube el archivo", type=["xlsx"])
@@ -158,16 +158,16 @@ if 'PLAZA BAT' in dataframe_bat.columns and 'FECHA DE PEDIDO' in dataframe_bat.c
     suma_paquetes = suma_paquetes.sort_values(['PLAZA', 'FECHA DE PEDIDO'])
 
     # Reorganizar las columnas
-    suma_paquetes = suma_paquetes[['PLAZA', 'ID PLAZA', 'PAQUETES', 'FOLIOS', 'FECHA DE PEDIDO', 'FECHA DE ENTREGA', 'TIPO DE PEDIDO']]
+    suma_paquetes = suma_paquetes[['PLAZA', 'ID PLAZA', 'PAQUETES', 'FOLIOS', 'FECHA DE PEDIDO']]
     st.write(suma_paquetes)
 
     # Opción para copiar el DataFrame
     st.title("Copiar DataFrame")
     csv = suma_paquetes.to_csv(index=False)
     st.download_button(
-        label="Copiar Tabla",
+        label="Descargar tabla",
         data=csv,
-        file_name='suma_paquetes.csv',
+        file_name='Tabla para correo.csv',
         mime='text/csv',
     )
 else:
