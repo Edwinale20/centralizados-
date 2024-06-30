@@ -13,7 +13,7 @@ st.title("Carga y proceso de 'centralizado BAT'")
 archivo_subido = st.file_uploader("Sube el archivo", type=["xlsx"])
 
 if archivo_subido is None:
-    st.info(" Sube el archivo de centralizado", icon = "i")
+    st.info(" Sube el archivo de centralizado")
     st.stop()
 
 # Opción para elegir el tipo de pedido
