@@ -100,7 +100,11 @@ if archivo_subido:
 
             if not df_plaza.empty:
                 if tipo_pedido == "complementario":
-                    df_plaza.insert(0, 'id Tienda', dataframe_bat[(dataframe_bat['PLAZA BAT'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)]['N TIENDA'].values)
+                    if 'N TIENDA' in dataframe_bat.columns:
+                        df_plaza.insert(0, 'id Tienda', dataframe_bat[(dataframe_bat['PLAZA BAT'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)]['N TIENDA'].values)
+                    else:
+                        st.error("La columna 'N TIENDA' no está presente en el archivo para el tipo de pedido 'complementario'.")
+                        st.stop()
                 else:
                     df_plaza.insert(0, 'id Tienda', codigos_plaza[plaza])
                 
