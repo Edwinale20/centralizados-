@@ -99,8 +99,8 @@ if archivo_subido:
             df_plaza = dataframe_bat[(dataframe_bat['PLAZA BAT'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)][columnas_sin_paquetes]
 
             if not df_plaza.empty:
-                if tipo_pedido == "complementario" and 'N TIENDA' in dataframe_bat.columns:
-                    df_plaza.insert(0, 'id Tienda', dataframe_bat[dataframe_bat['PLAZA BAT'] == plaza]['N TIENDA'])
+                if tipo_pedido == "complementario":
+                    df_plaza.insert(0, 'id Tienda', dataframe_bat[(dataframe_bat['PLAZA BAT'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)]['N TIENDA'].values)
                 else:
                     df_plaza.insert(0, 'id Tienda', codigos_plaza[plaza])
                 
@@ -245,3 +245,4 @@ fig.layout.margin.update({'t':75, 'l':50})
 fig.layout.update({'title': 'Comparativa de Paquetes por Plaza BAT'})
 
 st.plotly_chart(fig)
+
