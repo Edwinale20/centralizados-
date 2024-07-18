@@ -13,7 +13,7 @@ st.title("Carga y proceso de centralizado BAT")
 archivo_subido = st.file_uploader("Sube el archivo", type=["xlsx"])
 
 if archivo_subido is None:
-    st.info(" Sube el archivo de centralizado")
+    st.info("Sube el archivo de centralizado")
     st.stop()
 
 # Opción para elegir el tipo de pedido
@@ -243,6 +243,9 @@ fig.layout.yaxis2.update({'title': 'Cantidad de Paquetes'})
 # Actualizar los márgenes para añadir título y ver las etiquetas
 fig.layout.margin.update({'t':75, 'l':50})
 fig.layout.update({'title': 'Comparativa de Paquetes por Plaza BAT'})
+
+st.plotly_chart(fig)
+
 
 # Actualizar la altura debido a la interacción con la tabla
 fig.layout.update({'height':800})
