@@ -100,7 +100,7 @@ if archivo_subido:
 
             if not df_plaza.empty:
                 if tipo_pedido == "complementario" and 'N TIENDA' in dataframe_bat.columns:
-                    df_plaza.insert(0, 'id Tienda', dataframe_bat['N TIENDA'])
+                    df_plaza.insert(0, 'id Tienda', dataframe_bat[dataframe_bat['PLAZA BAT'] == plaza]['N TIENDA'])
                 else:
                     df_plaza.insert(0, 'id Tienda', codigos_plaza[plaza])
                 
@@ -244,11 +244,4 @@ fig.layout.yaxis2.update({'title': 'Cantidad de Paquetes'})
 fig.layout.margin.update({'t':75, 'l':50})
 fig.layout.update({'title': 'Comparativa de Paquetes por Plaza BAT'})
 
-st.plotly_chart(fig)
-
-
-# Actualizar la altura debido a la interacción con la tabla
-fig.layout.update({'height':800})
-
-# Mostrar la gráfica en Streamlit
 st.plotly_chart(fig)
