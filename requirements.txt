@@ -1,5 +1,6 @@
-pandas==2.1.1
-plotly==5.16.0
-streamlit==1.26.0
-openpyxl==3.1.5
-pillow==9.4.0
+pandas==1.5.3
+plotly==5.14.1
+streamlit==1.23.1
+openpyxl==3.1.1
+pillow==9.4.0 --prefer-binary
+pip==24.2
