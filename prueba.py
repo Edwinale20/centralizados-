@@ -181,7 +181,7 @@ else:
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
 
-st.title("Gráfica Comparativa de Paquetes por Plaza BAT")
+st.title("Cantidad de paquetes por Plaza")
 
 # Definir límites de paquetes por plaza
 limites_paquetes = {
