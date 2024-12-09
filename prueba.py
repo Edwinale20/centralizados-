@@ -17,7 +17,7 @@ if archivo_subido is None:
     st.stop()
 
 # Opción para elegir el tipo de pedido
-tipo_pedido = st.selectbox("Selecciona el tipo de pedido:", ["stock"])
+tipo_pedido = st.selectbox("Selecciona el tipo de pedido:", ["stock", "complementario"])
 
 if archivo_subido:
     try:
@@ -94,12 +94,13 @@ if archivo_subido:
     fechas_pedido = dataframe_bat['FECHA DE PEDIDO'].unique()
     for fecha in fechas_pedido:
         fecha_str = pd.to_datetime(fecha).strftime("%d%m%Y")
-        
+
         for plaza, numeros_plaza in plazas.items():
             df_plaza = dataframe_bat[(dataframe_bat['PLAZA BAT'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)][columnas_sin_paquetes]
 
             if not df_plaza.empty:
                 if tipo_pedido == "complementario":
+                    df_plaza.insert(0, 'id Tienda', dataframe_bat[(dataframe_bat['PLAZA BAT'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)]['N TIENDA'].values)
                     if 'N TIENDA' in dataframe_bat.columns:
                         df_plaza.insert(0, 'id Tienda', dataframe_bat[(dataframe_bat['PLAZA BAT'] == plaza) & (dataframe_bat['FECHA DE PEDIDO'] == fecha)]['N TIENDA'].values)
                     else:
@@ -107,7 +108,7 @@ if archivo_subido:
                         st.stop()
                 else:
                     df_plaza.insert(0, 'id Tienda', codigos_plaza[plaza])
-                
+
                 # Cambiar nombres de columnas
                 df_plaza = df_plaza[['id Tienda'] + columnas_sin_paquetes]
                 df_plaza.columns = ['id Tienda', 'Codigo de Barras', 'Id Articulo', 'Descripcion', 'Unidad Empaque', 'Cantidad (Pza)']
@@ -134,12 +135,12 @@ st.title("Tabla de Suma de Paquetes por PLAZA BAT")
 if 'PLAZA BAT' in dataframe_bat.columns and 'FECHA DE PEDIDO' in dataframe_bat.columns and 'PAQUETES' in dataframe_bat.columns:
     # Eliminar filas con valores nulos en las columnas de interés
     dataframe_bat = dataframe_bat.dropna(subset=['PLAZA BAT', 'FECHA DE PEDIDO', 'PAQUETES'])
-    
+
     # Asegurarse de que las columnas tienen el tipo de dato correcto
     dataframe_bat['PLAZA BAT'] = dataframe_bat['PLAZA BAT'].astype(str)
     dataframe_bat['FECHA DE PEDIDO'] = pd.to_datetime(dataframe_bat['FECHA DE PEDIDO'], errors='coerce')
     dataframe_bat['PAQUETES'] = pd.to_numeric(dataframe_bat['PAQUETES'], errors='coerce')
-    
+
     # Verificar que no haya valores nulos después de la conversión
     dataframe_bat = dataframe_bat.dropna(subset=['PLAZA BAT', 'FECHA DE PEDIDO', 'PAQUETES'])
 
@@ -181,7 +182,7 @@ else:
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
 
-st.title("Cantidad de paquetes por Plaza")
+st.title("Gráfica Comparativa de Paquetes por Plaza BAT")
 
 # Definir límites de paquetes por plaza
 limites_paquetes = {
@@ -249,4 +250,4 @@ fig.layout.margin.update({'t':75, 'l':50})
 fig.layout.update({'title': 'Comparativa de Paquetes por Plaza BAT'})
 
 st.plotly_chart(fig)
-
+~
