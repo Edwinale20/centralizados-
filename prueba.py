@@ -250,4 +250,4 @@ fig.layout.margin.update({'t':75, 'l':50})
 fig.layout.update({'title': 'Comparativa de Paquetes por Plaza BAT'})
 
 st.plotly_chart(fig)
-~
+
