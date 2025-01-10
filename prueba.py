@@ -247,7 +247,7 @@ fig.layout.yaxis2.update({'title': 'Cantidad de Paquetes'})
 
 # Actualizar los márgenes para añadir título y ver las etiquetas
 fig.layout.margin.update({'t':75, 'l':50})
-fig.layout.update({'title': 'Comparativa de Paquetes por Plaza BAT'})
+fig.layout.update({'title': 'Comparativa de Paquetes por CEDIS'})
 
 st.plotly_chart(fig)
 
