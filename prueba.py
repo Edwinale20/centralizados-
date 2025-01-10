@@ -182,11 +182,11 @@ else:
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
 
-st.title("Gráfica Comparativa de Paquetes por Plaza BAT")
+st.title("Gráfica Comparativa de Paquetes por CEDIS")
 
 # Definir límites de paquetes por plaza
 limites_paquetes = {
-    'Noreste': 22000,
+    'NORESTE': 22000,
     'MÉXICO': 8000,
     'PENÍNSULA': 2000,
     'HERMOSILLO': 2000,
@@ -201,7 +201,7 @@ paquetes_mexico = suma_paquetes[suma_paquetes['PLAZA'].isin(['MÉXICO', 'PUEBLA'
 
 # Crear un nuevo DataFrame con las agrupaciones
 data = {
-    'Plaza': ['Noreste', 'MÉXICO', 'PENÍNSULA', 'HERMOSILLO', 'JALISCO', 'BAJA CALIFORNIA'],
+    'Plaza': ['NORESTE', 'MÉXICO', 'PENÍNSULA', 'HERMOSILLO', 'JALISCO', 'BAJA CALIFORNIA'],
     'Paquetes': [
         paquetes_noreste,
         paquetes_mexico,
