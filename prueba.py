@@ -210,7 +210,7 @@ data = {
         suma_paquetes[suma_paquetes['PLAZA'] == 'JALISCO']['PAQUETES'].sum(),
         suma_paquetes[suma_paquetes['PLAZA'] == 'BAJA CALIFORNIA']['PAQUETES'].sum()
     ],
-    'Límite': [22,000, 8,000, 2000, 2000, 4000, 4000]
+    'Límite': [22000, 8000, 2000, 2000, 4000, 4000]
 }
 
 df_comparativa = pd.DataFrame(data)
